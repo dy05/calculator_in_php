@@ -1,9 +1,77 @@
 <?php
-    require 'functions.php';
-    if (! empty($_POST)) {
-        dd($_POST);
-//        dd($_SERVER['REQUEST_METHOD']);
+session_start();
+
+const EQUAL_CHARACTER = '=';
+const SUP_CHARACTER = 'sup';
+const NUMBERS = [0,1,2,3,4,5,6,7,8,9];
+
+// List of all operators
+$operators = ['-', '+', '\\', '*'];
+
+// List of all input characters coming from the form
+$characters = [];
+
+// List of all results in order
+$results = [];
+
+// To list all the query like 1+2+3...
+$operations = '';
+
+// The input character (can be a number or an operator)
+$character = null;
+
+
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    session_unset();
+} else {
+    if (isset($_SESSION['results'])) {
+        $results = $_SESSION['results'];
     }
+    if (isset($_SESSION['operations'])) {
+        $operations = $_SESSION['operations'];
+    }
+    if (isset($_SESSION['characters'])) {
+        $characters = $_SESSION['characters'];
+    }
+}
+
+// The result to show to the user after all operations
+$result = end($results);
+
+if (! empty($_POST)) {
+    require 'functions.php';
+    if (isset($_POST['character'])) {
+        $character = $_POST['character'];
+
+        if (in_array($character, NUMBERS)) {
+            $results[] = $character;
+            $characters[] = $character;
+        }
+        // If character is an operator
+        else if (in_array($character, $operators)) {
+            // If last characters array is an operator, delete it
+            if (in_array(end($characters), $operators)) {
+                $characters[count($characters) - 1] = $character;
+            } else {
+                $characters[] = $character;
+            }
+        } else if ($character === SUP_CHARACTER) {
+            array_pop($characters);
+        } else {
+            session_unset();
+        }
+
+//            var_dump($characters);
+//            die();
+        if ($character !== EQUAL_CHARACTER) {
+            $_SESSION['characters'] = $characters;
+        }
+    }
+}
+
+if (count($characters)) {
+    $operations = join('', $characters);
+}
 ?><!doctype html>
 <html lang="en">
 <head>
