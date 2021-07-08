@@ -3,10 +3,10 @@ session_start();
 
 const EQUAL_CHARACTER = '=';
 const SUP_CHARACTER = 'sup';
-const NUMBERS = [0,1,2,3,4,5,6,7,8,9];
+const NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, '.'];
 
 // List of all operators
-$operators = ['-', '+', '\\', '*'];
+const OPERATORS = ['-', '+', '/', '*'];
 
 // List of all input characters coming from the form
 $characters = [];
@@ -42,30 +42,92 @@ if (! empty($_POST)) {
     require 'functions.php';
     if (isset($_POST['character'])) {
         $character = $_POST['character'];
-
-        if (in_array($character, NUMBERS)) {
-            $results[] = $character;
-            $characters[] = $character;
+        $last_character = end($characters);
+        if ($character === '0' && substr($last_character, 0, 1) == '0') {
+            $character = null;
         }
-        // If character is an operator
-        else if (in_array($character, $operators)) {
-            // If last characters array is an operator, delete it
-            if (in_array(end($characters), $operators)) {
-                $characters[count($characters) - 1] = $character;
-            } else {
-                $characters[] = $character;
+
+        if ($character === ',') {
+            $character = '.';
+            if ($last_character && in_array($character, str_split($last_character))) {
+                $character = null;
             }
-        } else if ($character === SUP_CHARACTER) {
-            array_pop($characters);
-        } else {
-            session_unset();
         }
 
-//            var_dump($characters);
-//            die();
-        if ($character !== EQUAL_CHARACTER) {
-            $_SESSION['characters'] = $characters;
+        if ($character || $character == '0') {
+            if (in_array($character, NUMBERS)) {
+                // Verify that the last character exists and that it is greater than 0
+                if ($last_character && $last_character >= 0 || $last_character == '.') {
+                    $characters[count($characters) - 1] = $characters[count($characters) - 1] . $character;
+                } else {
+                    $characters[] = $character;
+                }
+            } // If character is an operator
+            else if (in_array($character, OPERATORS)) {
+                // If last characters array is an operator, delete it
+                if (in_array($last_character, OPERATORS)) {
+                    $characters[count($characters) - 1] = $character;
+                } else {
+                    $characters[] = $character;
+                }
+            } else if ($character === SUP_CHARACTER) {
+                // Verify that the last character exists and that its length is greater than 1
+                if ($last_character && strlen($last_character) > 1) {
+                    $characters[count($characters) - 1] = substr($characters[count($characters) - 1], 0, -1);
+                } else {
+                    array_pop($characters);
+                }
+            }
         }
+
+        if (count($characters) > 2) {
+            $total = [];
+            $last_operators = [];
+            $last_character = null;
+            foreach ($characters as $char) {
+                // Verify if $char is not 0 or .
+                if ($char == '0' || $char == '.') {
+                    continue;
+                }
+                $last_total = end($total);
+                if (in_array($char, OPERATORS)) {
+                    $last_operators[] = $char;
+                } else {
+                    if (count($last_operators)) {
+                        if (! $last_total) {
+                            $last_total = $last_character;
+                        }
+                        switch (end($last_operators)) {
+                            case '+':
+                                $total[] = add($last_total, $char);
+                                break;
+                            case '-':
+                                $total[] = remove($last_total, $char);
+                                break;
+                            case '*':
+                                $total[] = operate('*', $last_character, $char, $total, $last_operators);
+                                break;
+                            case '/':
+                                $total[] = operate('/', $last_character, $char, $total, $last_operators);
+                                break;
+                        }
+                    }
+                    $last_character = $char;
+                }
+            }
+            $results = $total;
+        } else {
+            $results = [];
+        }
+
+        if ($character == EQUAL_CHARACTER && count($results)) {
+            session_unset();
+        } else {
+            $_SESSION['characters'] = $characters;
+            $_SESSION['results'] = $results;
+            $result = end($results);
+        }
+        var_dump($results);
     }
 }
 
@@ -118,7 +180,7 @@ if (count($characters)) {
             </div>
             <div class="line-5">
                 <input class="p-2" type="submit" name="character" value="sup" />
-                <input class="p-2" type="submit" name="character" value="\" />
+                <input class="p-2" type="submit" name="character" value="/" />
                 <input class="p-2" type="submit" name="character" value="*" />
                 <input class="p-2" type="submit" name="character" value="-" />
                 <input class="p-2" type="submit" name="character" value="+" />
