@@ -82,15 +82,11 @@ if (! empty($_POST)) {
 
         $characters_length = count($characters);
         if ($characters_length > 2) {
-            $total = [];
+            $total = [(float)$characters[0]];
             $last_operators = [];
             $last_character = null;
             $count = 0;
             for ($count = 0; $count < $characters_length; $count++) {
-                var_dump($characters_length);
-                var_dump($count);
-                var_dump($characters_length !== $count - 1);
-                echo "<hr>";
                 $char = $characters[$count];
                 // Verify if $char is not 0 or .
                 if ($char == '0' || $char == '.') {
@@ -101,9 +97,6 @@ if (! empty($_POST)) {
                     $last_operators[] = $char;
                 } else {
                     if (count($last_operators)) {
-                        if (! $last_total) {
-                            $last_total = $last_character;
-                        }
                         switch (end($last_operators)) {
                             case '+':
                                 $total[] = add($last_total, $char);
@@ -112,25 +105,37 @@ if (! empty($_POST)) {
                                 $total[] = remove($last_total, $char);
                                 break;
                             case '*':
+                                var_dump($last_total);
                                 $operator = $last_operators[count($last_operators) - 2] ?? null;
-                                if (isset($total[count($total) - 2]) && in_array($operator, ['-', '+'])) {
+                                if (isset($total[count($total) - 2])) {
                                     $last_total = $total[count($total) - 2];
                                 }
-                                $total[] = operate('*', $last_character, $char, $last_total, $operator);
+
+                                if ($operator) {
+                                    var_dump($operator);
+                                    var_dump($last_total);
+                                    var_dump(multiply($last_character, $char));
+                                    $total[] = operate($operator, $last_total, multiply($last_character, $char));
+                                } else {
+                                    $total[] = multiply($last_character, $char);
+                                }
                                 break;
                             case '/':
                                 $operator = $last_operators[count($last_operators) - 2] ?? null;
-                                if (isset($total[count($total) - 2]) && in_array($operator, ['-', '+'])) {
+                                if (isset($total[count($total) - 2])) {
                                     $last_total = $total[count($total) - 2];
                                 }
-                                $total[] = operate('/', $last_character, $char, $last_total, $operator);
+
+                                if ($operator) {
+                                    $total[] = operate($operator, $last_total, divide($last_character, $char));
+                                } else {
+                                    $total[] = divide($last_character, $char);
+                                }
                                 break;
                         }
                     }
                     $last_character = $char;
                 }
-                var_dump($count);
-                var_dump($characters_length);
             }
 
             $results = $total;
@@ -143,14 +148,14 @@ if (! empty($_POST)) {
         } else {
             $_SESSION['characters'] = $characters;
             $_SESSION['results'] = $results;
-            $result = end($results);
+            $result = count($results) > 1 ? end($results) : null;
         }
         var_dump($results);
     }
 }
 
 if (count($characters)) {
-    $operations = join('', $characters);
+    $operations = join( ' ', $characters);
 }
 ?><!doctype html>
 <html lang="en">

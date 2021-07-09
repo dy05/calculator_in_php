@@ -1,38 +1,32 @@
 <?php
 
-function add($arg1, $arg2) {
+function add(float $arg1, float $arg2)
+{
     return $arg1 + $arg2;
 }
 
-function remove($arg1, $arg2) {
+function remove(float $arg1, float $arg2)
+{
     return $arg1 - $arg2;
 }
 
-function multiply($arg1, $arg2) {
+function multiply(float $arg1, float $arg2) {
     return $arg1 * $arg2;
 }
 
-function divide($arg1, $arg2) {
+function divide(float $arg1, float $arg2) {
     return $arg1 / $arg2;
 }
 
-function operate($operation, $arg1, $arg2, $last_total = null, $last_operator = null) {
-    switch ($operation) {
+function operate($operator, float $arg1, float $arg2) {
+    switch ($operator) {
         case '+':
             return add($arg1, $arg2);
         case '-':
              return remove($arg1, $arg2);
         case '*':
-            if ($last_total && $last_operator) {
-                return operate($last_operator, $last_total, multiply($arg1, $arg2));
-            }
-
             return multiply($arg1, $arg2);
         case '/':
-            if ($last_total && $last_operator) {
-                return operate($last_operator, $last_total, divide($arg1, $arg2));
-            }
-
             return divide($arg1, $arg2);
     }
 }
