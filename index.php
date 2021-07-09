@@ -80,11 +80,18 @@ if (! empty($_POST)) {
             }
         }
 
-        if (count($characters) > 2) {
+        $characters_length = count($characters);
+        if ($characters_length > 2) {
             $total = [];
             $last_operators = [];
             $last_character = null;
-            foreach ($characters as $char) {
+            $count = 0;
+            for ($count = 0; $count < $characters_length; $count++) {
+                var_dump($characters_length);
+                var_dump($count);
+                var_dump($characters_length !== $count - 1);
+                echo "<hr>";
+                $char = $characters[$count];
                 // Verify if $char is not 0 or .
                 if ($char == '0' || $char == '.') {
                     continue;
@@ -105,16 +112,27 @@ if (! empty($_POST)) {
                                 $total[] = remove($last_total, $char);
                                 break;
                             case '*':
-                                $total[] = operate('*', $last_character, $char, $total, $last_operators);
+                                $operator = $last_operators[count($last_operators) - 2] ?? null;
+                                if (isset($total[count($total) - 2]) && in_array($operator, ['-', '+'])) {
+                                    $last_total = $total[count($total) - 2];
+                                }
+                                $total[] = operate('*', $last_character, $char, $last_total, $operator);
                                 break;
                             case '/':
-                                $total[] = operate('/', $last_character, $char, $total, $last_operators);
+                                $operator = $last_operators[count($last_operators) - 2] ?? null;
+                                if (isset($total[count($total) - 2]) && in_array($operator, ['-', '+'])) {
+                                    $last_total = $total[count($total) - 2];
+                                }
+                                $total[] = operate('/', $last_character, $char, $last_total, $operator);
                                 break;
                         }
                     }
                     $last_character = $char;
                 }
+                var_dump($count);
+                var_dump($characters_length);
             }
+
             $results = $total;
         } else {
             $results = [];

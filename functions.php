@@ -16,25 +16,23 @@ function divide($arg1, $arg2) {
     return $arg1 / $arg2;
 }
 
-function operate($operation, $arg1, $arg2, &$total, &$last_operators, $indice = 0) {
+function operate($operation, $arg1, $arg2, $last_total = null, $last_operator = null) {
     switch ($operation) {
         case '+':
             return add($arg1, $arg2);
         case '-':
              return remove($arg1, $arg2);
         case '*':
-            if ($last_operators[$indice] == '*' || $last_operators[$indice] == '/') {
-                return operate($last_operators[$indice], $arg1, $arg2, $total[count($total) - $indice - 2], $last_operators, $indice - 1);
+            if ($last_total && $last_operator) {
+                return operate($last_operator, $last_total, multiply($arg1, $arg2));
             }
 
             return multiply($arg1, $arg2);
-//            return operate($last_operators[$indice - 2], $arg1, $arg2, $total, $last_operators, $indice - 1);
-//            return $total[count($total) - $indice - 2] multiply($arg1, $arg2);
         case '/':
-            if ($last_operators[$indice] == '*' || $last_operators[$indice] == '/') {
-//                return operate($last_operators[$indice], $arg1, $arg2, $total, $last_operators, $indice - 1);
-                return operate($last_operators[$indice], $arg1, $arg2, $total[count($total) - $indice - 2], $last_operators, $indice - 1);
+            if ($last_total && $last_operator) {
+                return operate($last_operator, $last_total, divide($arg1, $arg2));
             }
+
             return divide($arg1, $arg2);
     }
 }
