@@ -121,12 +121,14 @@ function unsetIndexFromArray($index, $operation, $array): array
 function divisionAndMultiplication($array): array
 {
     do {
-        $indexMultiplication = array_search('/', $array);
+        $indexMultiplication = array_search('*', $array);
         $indexDivision = array_search('/', $array);
-        if ($indexDivision < $indexMultiplication) {
-            $array = unsetIndexFromArray($indexDivision, '/', $array);
-        } else {
-            $array = unsetIndexFromArray($indexMultiplication, '*', $array);
+        if ($indexDivision || $indexMultiplication) {
+            if (! $indexMultiplication || ($indexDivision && $indexDivision < $indexMultiplication)) {
+                $array = unsetIndexFromArray($indexDivision, '/', $array);
+            } else {
+                $array = unsetIndexFromArray($indexMultiplication, '*', $array);
+            }
         }
         $array = array_values($array);
     } while($indexDivision || $indexMultiplication);
