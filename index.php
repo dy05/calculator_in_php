@@ -24,6 +24,9 @@ $result = null;
 // The input character (can be a number or an operator)
 $character = null;
 
+// The error to show to user
+$error = null;
+
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     session_unset();
@@ -60,10 +63,15 @@ if (! empty($_POST)) {
                 } else {
                     $characters[] = $character;
                 }
-            } // If character is an operator
+            }
+            // If character is an operator
             else if (in_array($character, OPERATORS)) {
-                // If last characters array is an operator, delete it
-                if (in_array($last_character, OPERATORS)) {
+                // If last character is null
+                if (! $last_character) {
+                    $error = 'You cant add an operator first';
+                }
+                // If last characters array is an operator, replace it
+                else if (in_array($last_character, OPERATORS)) {
                     $characters[count($characters) - 1] = $character;
                 } else {
                     $characters[] = $character;
@@ -80,7 +88,16 @@ if (! empty($_POST)) {
 
         $characters_length = count($characters);
         if ($characters_length > 2) {
-            $results = getTotal($characters);
+            $characters_temp = $characters;
+            // Do division operation first
+            if (in_array('/', $characters_temp)) {
+                $characters_temp = dividePriority($characters_temp);
+            }
+            // Do multiplication operation first
+            if (in_array('*', $characters_temp)) {
+                $characters_temp = multiplyPriority($characters_temp);
+            }
+            $results = getTotal($characters_temp);
         } else {
             $results = [];
         }
@@ -92,7 +109,6 @@ if (! empty($_POST)) {
             $_SESSION['results'] = $results;
             $result = count($results) > 1 ? end($results) : null;
         }
-        var_dump($results);
     }
 }
 
@@ -113,6 +129,9 @@ if (count($characters)) {
 
 <div class="container">
     <h1>Calculator in PHP</h1>
+    <?php if ($error): ?>
+    <div class="error p-2 m-4"><?= $error; ?></div>
+    <?php endif; ?>
     <form action="" method="post">
         <div class="board">
             <label class="d-none" for="operations"></label>

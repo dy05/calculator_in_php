@@ -1,5 +1,7 @@
 <?php
 
+$array = ['2', '-', '4', '*', '0', '*', '3', '-', '5', '*', '2'];
+
 function add(float $arg1, float $arg2)
 {
     return $arg1 + $arg2;
@@ -35,7 +37,6 @@ function getTotal($characters): array
 {
     $total = [(float)$characters[0]];
     $last_operators = [];
-    $last_character = null;
 
     for ($count = 0; $count < count($characters); $count++) {
         $char = $characters[$count];
@@ -55,40 +56,44 @@ function getTotal($characters): array
                     case '-':
                         $total[] = remove($last_total, $char);
                         break;
-                    case '*':
-                        var_dump($last_total);
-                        $operator = $last_operators[count($last_operators) - 2] ?? null;
-                        if (isset($total[count($total) - 2])) {
-                            $last_total = $total[count($total) - 2];
-                        }
-
-                        if ($operator) {
-                            var_dump($operator);
-                            var_dump($last_total);
-                            var_dump(multiply($last_character, $char));
-                            $total[] = operate($operator, $last_total, multiply($last_character, $char));
-                        } else {
-                            $total[] = multiply($last_character, $char);
-                        }
-                        break;
-                    case '/':
-                        $operator = $last_operators[count($last_operators) - 2] ?? null;
-                        if (isset($total[count($total) - 2])) {
-                            $last_total = $total[count($total) - 2];
-                        }
-
-                        if ($operator) {
-                            $total[] = operate($operator, $last_total, divide($last_character, $char));
-                        } else {
-                            $total[] = divide($last_character, $char);
-                        }
-                        break;
                 }
             }
-            $last_character = $char;
         }
     }
 
     return $total;
 }
 
+function multiplyPriority($array) {
+    do {
+        $index = array_search('*', $array);
+        if ($index === count($array) - 1) {
+            unset($array[$index]);
+        } else if ($index && isset($array[$index - 1]) && isset($array[$index + 1])) {
+            $array[$index - 1] = multiply((float)$array[$index - 1], (float)$array[$index + 1]);
+            // Remove the number after the operator
+            unset($array[$index + 1]);
+            // Remove the index of the operator
+            unset($array[$index]);
+        }
+        $array = array_values($array);
+    } while($index);
+    return $array;
+}
+
+function dividePriority($array) {
+    do {
+        $index = array_search('/', $array);
+        if ($index === count($array) - 1) {
+            unset($array[$index]);
+        } else if ($index && isset($array[$index - 1]) && isset($array[$index + 1])) {
+            $array[$index - 1] = divide((float)$array[$index - 1], (float)$array[$index + 1]);
+            // Remove the number after the operator
+            unset($array[$index + 1]);
+            // Remove the index of the operator
+            unset($array[$index]);
+        }
+        $array = array_values($array);
+    } while($index);
+    return $array;
+}

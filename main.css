@@ -62,3 +62,15 @@ body {
 .d-none {
     display: none;
 }
+
+.error {
+    font-weight: 800;
+    font-size: 18px;
+    color: rgba(245, 1, 1, 0.9);
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+.m-4 {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}

@@ -14,6 +14,8 @@ This project must be deployed in a php environment, preferably with php version 
 
 ## Features
 
+- It could be interesting to start operation with + or -
+
 I will surely make a javascript version of this project, so check this [README file](Readme.md) later 
 
 ## Credits
