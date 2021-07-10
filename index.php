@@ -17,6 +17,10 @@ $results = [];
 // To list all the query like 1+2+3...
 $operations = '';
 
+
+// The result to show to the user after all operations
+$result = null;
+
 // The input character (can be a number or an operator)
 $character = null;
 
@@ -24,9 +28,6 @@ $character = null;
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     session_unset();
 } else {
-    if (isset($_SESSION['results'])) {
-        $results = $_SESSION['results'];
-    }
     if (isset($_SESSION['operations'])) {
         $operations = $_SESSION['operations'];
     }
@@ -34,9 +35,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $characters = $_SESSION['characters'];
     }
 }
-
-// The result to show to the user after all operations
-$result = end($results);
 
 if (! empty($_POST)) {
     require 'functions.php';
@@ -82,63 +80,7 @@ if (! empty($_POST)) {
 
         $characters_length = count($characters);
         if ($characters_length > 2) {
-            $total = [(float)$characters[0]];
-            $last_operators = [];
-            $last_character = null;
-            $count = 0;
-            for ($count = 0; $count < $characters_length; $count++) {
-                $char = $characters[$count];
-                // Verify if $char is not 0 or .
-                if ($char == '0' || $char == '.') {
-                    continue;
-                }
-                $last_total = end($total);
-                if (in_array($char, OPERATORS)) {
-                    $last_operators[] = $char;
-                } else {
-                    if (count($last_operators)) {
-                        switch (end($last_operators)) {
-                            case '+':
-                                $total[] = add($last_total, $char);
-                                break;
-                            case '-':
-                                $total[] = remove($last_total, $char);
-                                break;
-                            case '*':
-                                var_dump($last_total);
-                                $operator = $last_operators[count($last_operators) - 2] ?? null;
-                                if (isset($total[count($total) - 2])) {
-                                    $last_total = $total[count($total) - 2];
-                                }
-
-                                if ($operator) {
-                                    var_dump($operator);
-                                    var_dump($last_total);
-                                    var_dump(multiply($last_character, $char));
-                                    $total[] = operate($operator, $last_total, multiply($last_character, $char));
-                                } else {
-                                    $total[] = multiply($last_character, $char);
-                                }
-                                break;
-                            case '/':
-                                $operator = $last_operators[count($last_operators) - 2] ?? null;
-                                if (isset($total[count($total) - 2])) {
-                                    $last_total = $total[count($total) - 2];
-                                }
-
-                                if ($operator) {
-                                    $total[] = operate($operator, $last_total, divide($last_character, $char));
-                                } else {
-                                    $total[] = divide($last_character, $char);
-                                }
-                                break;
-                        }
-                    }
-                    $last_character = $char;
-                }
-            }
-
-            $results = $total;
+            $results = getTotal($characters);
         } else {
             $results = [];
         }
