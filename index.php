@@ -107,7 +107,7 @@ if (! empty($_POST)) {
         } else {
             $_SESSION['characters'] = $characters;
             $_SESSION['results'] = $results;
-            $result = count($results) > 1 ? end($results) : null;
+            $result = end($results) ?? null;
         }
     }
 }
