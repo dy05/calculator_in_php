@@ -82,13 +82,9 @@ if (! empty($_POST)) {
         }
         $characters_length = count($characters);
         if ($characters_length > 2) {
-            // Do division operation first
-            if (in_array('/', $characters_temp)) {
-                $characters_temp = dividePriority($characters_temp);
-            }
-            // Do multiplication operation first
-            if (in_array('*', $characters_temp)) {
-                $characters_temp = multiplyPriority($characters_temp);
+            // Do division and multiplication from left to right operation first
+            if (in_array('*', $characters_temp) && in_array('/', $characters_temp)) {
+                $characters_temp = divisionAndMultiplication($characters_temp);
             }
             $results = getTotal($characters_temp);
         } else {

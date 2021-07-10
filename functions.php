@@ -64,7 +64,8 @@ function getTotal($characters): array
     return $total;
 }
 
-function multiplyPriority($array) {
+function multiplyPriority($array): array
+{
     do {
         $index = array_search('*', $array);
         if ($index === count($array) - 1) {
@@ -81,7 +82,8 @@ function multiplyPriority($array) {
     return $array;
 }
 
-function dividePriority($array) {
+function dividePriority($array): array
+{
     do {
         $index = array_search('/', $array);
         if ($index === count($array) - 1) {
@@ -98,7 +100,8 @@ function dividePriority($array) {
     return $array;
 }
 
-function removeZero($array) {
+function removeZero($array): array
+{
     do {
         $index = array_search('0', $array);
         if ($index) {
@@ -107,5 +110,36 @@ function removeZero($array) {
         }
         $array = array_values($array);
     } while($index);
+    return $array;
+}
+
+function divisionAndMultiplication($array): array
+{
+    do {
+        $indexMultiplication = array_search('/', $array);
+        $indexDivision = array_search('/', $array);
+        if ($indexDivision < $indexMultiplication) {
+            if ($indexDivision === count($array) - 1) {
+                unset($array[$indexDivision]);
+            } else if ($indexDivision && isset($array[$indexDivision - 1]) && isset($array[$indexDivision + 1])) {
+                $array[$indexDivision - 1] = divide((float)$array[$indexDivision - 1], (float)$array[$indexDivision + 1]);
+                // Remove the number after the operator
+                unset($array[$indexDivision + 1]);
+                // Remove the index of the operator
+                unset($array[$indexDivision]);
+            }
+        } else {
+            if ($indexMultiplication === count($array) - 1) {
+                unset($array[$indexMultiplication]);
+            } else if ($indexMultiplication && isset($array[$indexMultiplication - 1]) && isset($array[$indexMultiplication + 1])) {
+                $array[$indexMultiplication - 1] = multiply((float)$array[$indexMultiplication - 1], (float)$array[$indexMultiplication + 1]);
+                // Remove the number after the operator
+                unset($array[$indexMultiplication + 1]);
+                // Remove the index of the operator
+                unset($array[$indexMultiplication]);
+            }
+        }
+        $array = array_values($array);
+    } while($indexDivision || $indexMultiplication);
     return $array;
 }
