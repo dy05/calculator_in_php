@@ -1,26 +1,27 @@
 <?php
 
-$array = ['2', '-', '4', '*', '0', '*', '3', '-', '5', '*', '2'];
-
-function add(float $arg1, float $arg2)
+function add(float $arg1, float $arg2): float
 {
     return $arg1 + $arg2;
 }
 
-function remove(float $arg1, float $arg2)
+function remove(float $arg1, float $arg2): float
 {
     return $arg1 - $arg2;
 }
 
-function multiply(float $arg1, float $arg2) {
+function multiply(float $arg1, float $arg2): float
+{
     return $arg1 * $arg2;
 }
 
-function divide(float $arg1, float $arg2) {
+function divide(float $arg1, float $arg2): float
+{
     return $arg1 / $arg2;
 }
 
-function operate($operator, float $arg1, float $arg2) {
+function operate($operator, float $arg1, float $arg2): ?float
+{
     switch ($operator) {
         case '+':
             return add($arg1, $arg2);
@@ -31,6 +32,8 @@ function operate($operator, float $arg1, float $arg2) {
         case '/':
             return divide($arg1, $arg2);
     }
+
+    return null;
 }
 
 function getTotal($characters): array
@@ -68,15 +71,7 @@ function multiplyPriority($array): array
 {
     do {
         $index = array_search('*', $array);
-        if ($index === count($array) - 1) {
-            unset($array[$index]);
-        } else if ($index && isset($array[$index - 1]) && isset($array[$index + 1])) {
-            $array[$index - 1] = multiply((float)$array[$index - 1], (float)$array[$index + 1]);
-            // Remove the number after the operator
-            unset($array[$index + 1]);
-            // Remove the index of the operator
-            unset($array[$index]);
-        }
+        $array = unsetIndexFromArray($index, '*', $array);
         $array = array_values($array);
     } while($index);
     return $array;
@@ -86,15 +81,7 @@ function dividePriority($array): array
 {
     do {
         $index = array_search('/', $array);
-        if ($index === count($array) - 1) {
-            unset($array[$index]);
-        } else if ($index && isset($array[$index - 1]) && isset($array[$index + 1])) {
-            $array[$index - 1] = divide((float)$array[$index - 1], (float)$array[$index + 1]);
-            // Remove the number after the operator
-            unset($array[$index + 1]);
-            // Remove the index of the operator
-            unset($array[$index]);
-        }
+        $array = unsetIndexFromArray($index, '/', $array);
         $array = array_values($array);
     } while($index);
     return $array;
@@ -113,31 +100,33 @@ function removeZero($array): array
     return $array;
 }
 
+function unsetIndexFromArray($index, $operation, $array): array
+{
+    if ($index === count($array) - 1) {
+        unset($array[$index]);
+    } else if ($index && isset($array[$index - 1]) && isset($array[$index + 1])) {
+        if ($operation === '*' || $operation === '/') {
+            $array[$index - 1] = $operation === '*'
+                ? multiply((float)$array[$index - 1], (float)$array[$index + 1])
+                : divide((float)$array[$index - 1], (float)$array[$index + 1]);
+            // Remove the number after the operator
+            unset($array[$index + 1]);
+            // Remove the index of the operator
+            unset($array[$index]);
+        }
+    }
+    return $array;
+}
+
 function divisionAndMultiplication($array): array
 {
     do {
         $indexMultiplication = array_search('/', $array);
         $indexDivision = array_search('/', $array);
         if ($indexDivision < $indexMultiplication) {
-            if ($indexDivision === count($array) - 1) {
-                unset($array[$indexDivision]);
-            } else if ($indexDivision && isset($array[$indexDivision - 1]) && isset($array[$indexDivision + 1])) {
-                $array[$indexDivision - 1] = divide((float)$array[$indexDivision - 1], (float)$array[$indexDivision + 1]);
-                // Remove the number after the operator
-                unset($array[$indexDivision + 1]);
-                // Remove the index of the operator
-                unset($array[$indexDivision]);
-            }
+            $array = unsetIndexFromArray($indexDivision, '/', $array);
         } else {
-            if ($indexMultiplication === count($array) - 1) {
-                unset($array[$indexMultiplication]);
-            } else if ($indexMultiplication && isset($array[$indexMultiplication - 1]) && isset($array[$indexMultiplication + 1])) {
-                $array[$indexMultiplication - 1] = multiply((float)$array[$indexMultiplication - 1], (float)$array[$indexMultiplication + 1]);
-                // Remove the number after the operator
-                unset($array[$indexMultiplication + 1]);
-                // Remove the index of the operator
-                unset($array[$indexMultiplication]);
-            }
+            $array = unsetIndexFromArray($indexMultiplication, '*', $array);
         }
         $array = array_values($array);
     } while($indexDivision || $indexMultiplication);
