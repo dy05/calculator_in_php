@@ -97,3 +97,15 @@ function dividePriority($array) {
     } while($index);
     return $array;
 }
+
+function removeZero($array) {
+    do {
+        $index = array_search('0', $array);
+        if ($index) {
+            // Remove the index of zero
+            unset($array[$index]);
+        }
+        $array = array_values($array);
+    } while($index);
+    return $array;
+}

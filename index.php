@@ -1,6 +1,4 @@
 <?php
-session_start();
-
 const EQUAL_CHARACTER = '=';
 const SUP_CHARACTER = 'sup';
 const NUMBERS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, '.'];
@@ -27,20 +25,12 @@ $character = null;
 // The error to show to user
 $error = null;
 
-
-if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    session_unset();
-} else {
-    if (isset($_SESSION['operations'])) {
-        $operations = $_SESSION['operations'];
-    }
-    if (isset($_SESSION['characters'])) {
-        $characters = $_SESSION['characters'];
-    }
-}
-
 if (! empty($_POST)) {
     require 'functions.php';
+    if (isset($_POST['characters'])) {
+        $characters = json_decode($_POST['characters']);
+    }
+
     if (isset($_POST['character'])) {
         $character = $_POST['character'];
         $last_character = end($characters);
@@ -86,9 +76,12 @@ if (! empty($_POST)) {
             }
         }
 
+        $characters_temp = $characters;
+        if (in_array('0', $characters_temp)) {
+            $characters_temp = removeZero($characters_temp);
+        }
         $characters_length = count($characters);
         if ($characters_length > 2) {
-            $characters_temp = $characters;
             // Do division operation first
             if (in_array('/', $characters_temp)) {
                 $characters_temp = dividePriority($characters_temp);
@@ -103,10 +96,6 @@ if (! empty($_POST)) {
         }
 
         if ($character == EQUAL_CHARACTER && count($results)) {
-            session_unset();
-        } else {
-            $_SESSION['characters'] = $characters;
-            $_SESSION['results'] = $results;
             $result = end($results) ?? null;
         }
     }
@@ -133,6 +122,7 @@ if (count($characters)) {
     <div class="error p-2 m-4"><?= $error; ?></div>
     <?php endif; ?>
     <form action="" method="post">
+        <input type="hidden" name="characters" value='<?= json_encode($characters) ?>'>
         <div class="board">
             <label class="d-none" for="operations"></label>
             <label class="d-none" for="result"></label>
@@ -173,5 +163,23 @@ if (count($characters)) {
     </form>
 </div>
 
+<script>
+window.addEventListener('load', () => {
+  var $input_characters = document.querySelector('input[name="characters"]');
+  var $isEqual = `<?= $result ?>`;
+  if (! $isEqual && $input_characters) {
+    var $characters = JSON.parse($input_characters.value);
+    if ($characters.length > 2) {
+      var $last_character = $characters[$characters.length - 1];
+      if (!['-', '+', '.', '*', '/'].includes($last_character)) {
+        // $characters.pop();
+        setTimeout(() => {
+          alert(eval($characters.join('')));
+        }, 2000);
+      }
+    }
+  }
+})
+</script>
 </body>
 </html>
