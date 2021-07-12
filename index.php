@@ -83,9 +83,10 @@ if (! empty($_POST)) {
         $characters_length = count($characters);
         if ($characters_length > 2) {
             // Do division and multiplication from left to right operation first
-            if (in_array('*', $characters_temp) && in_array('/', $characters_temp)) {
+            if (in_array('*', $characters_temp) || in_array('/', $characters_temp)) {
                 $characters_temp = divisionAndMultiplication($characters_temp);
             }
+
             $results = getTotal($characters_temp);
         } else {
             $results = [];
@@ -118,7 +119,7 @@ if (count($characters)) {
     <div class="error p-2 m-4"><?= $error; ?></div>
     <?php endif; ?>
     <form action="" method="post">
-        <input type="hidden" name="characters" value='<?= json_encode($characters) ?>'>
+        <input type="hidden" name="characters" value="<?= htmlspecialchars(json_encode($characters), ENT_QUOTES, 'UTF-8') ?>">
         <div class="board">
             <label class="d-none" for="operations"></label>
             <label class="d-none" for="result"></label>
@@ -161,14 +162,13 @@ if (count($characters)) {
 
 <script>
 window.addEventListener('load', () => {
-  var $input_characters = document.querySelector('input[name="characters"]');
-  var $isEqual = `<?= $result ?>`;
+  let $input_characters = document.querySelector('input[name="characters"]');
+  let $isEqual = `<?= $result ?>`;
   if (! $isEqual && $input_characters) {
-    var $characters = JSON.parse($input_characters.value);
+    let $characters = JSON.parse($input_characters.value);
     if ($characters.length > 2) {
-      var $last_character = $characters[$characters.length - 1];
+      let $last_character = $characters[$characters.length - 1];
       if (!['-', '+', '.', '*', '/'].includes($last_character)) {
-        // $characters.pop();
         setTimeout(() => {
           alert(eval($characters.join('')));
         }, 2000);
