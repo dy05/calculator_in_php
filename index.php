@@ -86,20 +86,19 @@ if (! empty($_POST)) {
             if (in_array('*', $characters_temp) || in_array('/', $characters_temp)) {
                 $characters_temp = divisionAndMultiplication($characters_temp);
             }
-
             $results = getTotal($characters_temp);
         } else {
             $results = [];
         }
 
-        if ($character == EQUAL_CHARACTER && count($results)) {
+        // if ($character == EQUAL_CHARACTER && count($results)) {
             $result = end($results) ?? null;
-        }
+        // }
     }
 }
 
 if (count($characters)) {
-    $operations = join( ' ', $characters);
+    $operations = join(' ', $characters);
 }
 ?><!doctype html>
 <html lang="en">
@@ -161,20 +160,20 @@ if (count($characters)) {
 </div>
 
 <script>
+<?php 
+if (in_array('0', $characters)) {
+    $characters = removeZero($characters);
+}
+$characters = join('', $characters);
+?>
 window.addEventListener('load', () => {
-  let $input_characters = document.querySelector('input[name="characters"]');
-  let $isEqual = `<?= $result ?>`;
-  if (! $isEqual && $input_characters) {
-    let $characters = JSON.parse($input_characters.value);
+    let $characters = `<?= $characters; ?>`;
     if ($characters.length > 2) {
-      let $last_character = $characters[$characters.length - 1];
-      if (!['-', '+', '.', '*', '/'].includes($last_character)) {
-        setTimeout(() => {
-          alert(eval($characters.join('')));
-        }, 2000);
-      }
+        let $last_character = $characters[$characters.length - 1];
+        if (! ['-', '+', '.', '*', '/'].includes($last_character)) {
+            console.log(eval($characters));
+        }
     }
-  }
 })
 </script>
 </body>

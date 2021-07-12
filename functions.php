@@ -41,7 +41,7 @@ function getTotal($characters): array
     $total = [(float)$characters[0]];
     $last_operators = [];
 
-    for ($count = 0; $count < count($characters); $count++) {
+    for ($count = 1; $count < count($characters); $count++) {
         $char = $characters[$count];
         // Verify if $char is not 0 or .
         if ($char == '0' || $char == '.') {
@@ -91,7 +91,7 @@ function removeZero($array): array
 {
     do {
         $index = array_search('0', $array);
-        if ($index) {
+        if ($index >= 0) {
             // Remove the index of zero
             unset($array[$index]);
         }
@@ -100,7 +100,7 @@ function removeZero($array): array
     return $array;
 }
 
-function unsetIndexFromArray($index, $operation, $array): array
+function unsetIndexFromArray(int $index, string $operation, array $array): array
 {
     if ($index === count($array) - 1) {
         unset($array[$index]);
